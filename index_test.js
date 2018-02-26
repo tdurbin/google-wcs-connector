@@ -226,6 +226,8 @@ function processResponse(err, response) {
 }
 
 // This code sends the customer message to the bot.
+
+/**
 echoAgent.on('MyCoolAgent.ContentEvent', (contentEvent) => {
     greenlight = 1;
     dialogID = contentEvent.dialogId;
@@ -242,6 +244,29 @@ echoAgent.on('MyCoolAgent.ContentEvent', (contentEvent) => {
 
     console.log('Inbound message: ' + contentEvent.message);
 });
+**/
+
+echoAgent.on('MyCoolAgent.ContentEvnet',(contentEvent)=>{
+    greenlight = 1;
+    dialogID = contentEvent.dialogId;
+
+    console.log("sending message: " + contentEvent.message);
+    message = contentEvent.message;
+
+    setTimeout(function(){
+
+        if(greenlight){
+            conversation.message({
+                input: {
+                    text: message
+                },
+                context : context
+            }, processResponse);
+            greenlight = 0;
+        }
+    }, 5000);
+});
+
 
 /*******************************************************************
  * Functions which are called by the main processResponse function *
