@@ -246,7 +246,7 @@ echoAgent.on('MyCoolAgent.ContentEvent', (contentEvent) => {
 });
 **/
 
-echoAgent.on('MyCoolAgent.ContentEvnet',(contentEvent)=>{
+echoAgent.on('MyCoolAgent.ContentEvent',(contentEvent)=>{
     greenlight = 1;
     dialogID = contentEvent.dialogId;
 
