@@ -64,18 +64,16 @@ class MyCoolAgent extends Agent {
                     const consumerId = change.result.conversationDetails.participants.filter(p => p.role === "CONSUMER")[0].id;
                     console.log('Consumer ID    : ' + consumerId);
 
-                    var request = require('request');
-
                     this.getUserProfile(consumerId, (e, profileResp) => {
 
-                        this.publishEvent({
-                            dialogId: change.result.convId,
-                            event: {
-                                type: 'ContentEvent',
-                                contentType: 'text/plain',
-                                message: ''
-                            }
-                        });
+//                        this.publishEvent({
+//                            dialogId: change.result.convId,
+//                            event: {
+//                                type: 'ContentEvent',
+//                                contentType: 'text/plain',
+//                                message: ''
+//                            }
+//                        });
 
                     });
                     this.subscribeMessagingEvents({
