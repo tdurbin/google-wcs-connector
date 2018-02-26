@@ -64,18 +64,18 @@ class MyCoolAgent extends Agent {
                     const consumerId = change.result.conversationDetails.participants.filter(p => p.role === "CONSUMER")[0].id;
                     console.log('Consumer ID    : ' + consumerId);
 
-//                    var request = require('request');
+                    var request = require('request');
 
                     this.getUserProfile(consumerId, (e, profileResp) => {
 
-//                        this.publishEvent({
-//                            dialogId: change.result.convId,
-//                            event: {
-//                                type: 'ContentEvent',
-//                                contentType: 'text/plain',
-//                                message: ''
-//                            }
-//                        });
+                        this.publishEvent({
+                            dialogId: change.result.convId,
+                            event: {
+                                type: 'ContentEvent',
+                                contentType: 'text/plain',
+                                message: ''
+                            }
+                        });
 
                     });
                     this.subscribeMessagingEvents({
@@ -91,48 +91,49 @@ class MyCoolAgent extends Agent {
         // Echo every unread consumer message and mark it as read
         this.on('ms.MessagingEventNotification', body => {
 
+            const respond = {};
+            body.changes.forEach(c => {
 
+                // In the current version MessagingEventNotification are received also without subscription
+                // Will be fixed in the next api version. So we have to check if this notification is handled by us.
 
-                    const respond = {};
-                    body.changes.forEach(c => {
-                        // In the current version MessagingEventNotification are received also without subscription
-                        // Will be fixed in the next api version. So we have to check if this notification is handled by us.
+                if (openConvs[c.dialogId]) {
+                    // add to respond list all content event not by me
+                    if (c.event.type === 'ContentEvent' && c.originatorMetadata.role === 'CONSUMER' && c.originatorId !== this.agentId) {
+                        respond[`${body.dialogId}-${c.sequence}`] = {
+                            dialogId: body.dialogId,
+                            sequence: c.sequence,
+                            message: c.event.message
+                        };
 
+                    }
+                    // remove from respond list all the messages that were already read
+                    if (c.event.type === 'AcceptStatusEvent' && c.originatorId === this.agentId) {
+                        c.event.sequenceList.forEach(seq => {
+                            delete respond[`${body.dialogId}-${seq}`];
+                        });
+                    }
+                }
 
+            });
 
-                        if (openConvs[c.dialogId]) {
-                            // add to respond list all content event not by me
-                            if (c.event.type === 'ContentEvent' && c.originatorMetadata.role === 'CONSUMER' && c.originatorId !== this.agentId) {
-                                respond[`${body.dialogId}-${c.sequence}`] = {
-                                    dialogId: body.dialogId,
-                                    sequence: c.sequence,
-                                    message: c.event.message
-                                };
+            // publish read, and echo
+            Object.keys(respond).forEach(key => {
 
-                            }
-                            // remove from respond list all the messages that were already read
-                            if (c.event.type === 'AcceptStatusEvent' && c.originatorId === this.agentId) {
-                                c.event.sequenceList.forEach(seq => {
-                                    delete respond[`${body.dialogId}-${seq}`];
-                                });
-                            }
-                        }
+                var contentEvent = respond[key];
+                this.publishEvent({
 
+                    dialogId: contentEvent.dialogId,
+                    event: {
+                        type: "AcceptStatusEvent",
+                        status: "READ",
+                        sequenceList: [contentEvent.sequence]
+                    }
+                });
+                this.emit(this.CONTENT_NOTIFICATION, contentEvent);
 
-                    });
+            });
 
-                    // publish read, and echo
-                    Object.keys(respond).forEach(key => {
-
-                        var contentEvent = respond[key];
-                        this.publishEvent({
-
-                            dialogId: contentEvent.dialogId,
-                            event: {type: "AcceptStatusEvent", status: "READ", sequenceList: [contentEvent.sequence]}
-                       });
-                        this.emit(this.CONTENT_NOTIFICATION, contentEvent);
-
-                    });
         });
 
         // Tracing
