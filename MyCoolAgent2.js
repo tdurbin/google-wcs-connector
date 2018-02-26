@@ -67,7 +67,7 @@ class MyCoolAgent extends Agent {
                             event: {
                                 type: 'ContentEvent',
                                 contentType: 'text/plain',
-                                message: `Just joined to conversation with ${JSON.stringify(profileResp)}`
+                                message: ''
                             }
                         });
                     });
