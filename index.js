@@ -18,6 +18,7 @@ setInterval(function() {
 }, 600000);
 // *************************************************************
 
+
 var prompt = require('prompt-sync')();
 var ConversationV1 = require('watson-developer-cloud/conversation/v1');
 var MyCoolAgent = require('./MyCoolAgent2');
