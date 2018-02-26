@@ -264,7 +264,7 @@ echoAgent.on('MyCoolAgent.ContentEvent',(contentEvent)=>{
             }, processResponse);
             greenlight = 0;
         }
-    }, 5000);
+    }, 500);
 });
 
 
