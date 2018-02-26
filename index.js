@@ -10,7 +10,7 @@ http.createServer(function (req, res) {
     res.writeHead(200, {'Content-Type': 'text/plain'});
     res.write('Super Awesome Connector for WCS');
     res.end();
-}).listen(6000);
+}).listen(process.env.PORT || 6000);
 
 // ping heroku every 10 minutes to keep the connector running
 setInterval(function() {
