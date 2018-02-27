@@ -14,7 +14,7 @@ http.createServer(function (req, res) {
 
 // ping heroku every 10 minutes to keep the connector running
 setInterval(function() {
-    http.get("http://fisrv-wcs-connector.herokuapp.com");
+    http.get("http://retail-wcs-connector.herokuapp.com");
 }, 600000);
 // *************************************************************
 
@@ -226,24 +226,20 @@ function processResponse(err, response) {
 }
 
 // This code sends the customer message to the bot.
+/** Original code without greenlight hack...
 
-/**
 echoAgent.on('MyCoolAgent.ContentEvent', (contentEvent) => {
-    greenlight = 1;
     dialogID = contentEvent.dialogId;
-
-    if(greenlight){
-      conversation.message({
-          input: {
-              text: contentEvent.message
-          },
-          context: context
-      }, processResponse);
-      greenlight = 0;
-    }
+    conversation.message({
+        input: {
+            text: contentEvent.message
+        },
+        context: context
+    }, processResponse);
 
     console.log('Inbound message: ' + contentEvent.message);
 });
+
 **/
 
 echoAgent.on('MyCoolAgent.ContentEvent',(contentEvent)=>{
@@ -264,7 +260,7 @@ echoAgent.on('MyCoolAgent.ContentEvent',(contentEvent)=>{
             }, processResponse);
             greenlight = 0;
         }
-    }, 500);
+    }, 100); //Pause for 100 milliseconds so only the last utterance from the customer is processed.
 });
 
 
