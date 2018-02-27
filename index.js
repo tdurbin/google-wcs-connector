@@ -150,10 +150,22 @@ function processResponse(err, response) {
                 // Hack for escalation using the IBM aviation workspace.
                 else if (answer == "No worries!") {
 
-                    console.log('Aviation escalate: Intercept and escalate!');
-                    answer = "Transferring you back to the Astra Air Concierge Bot..."
+                    console.log('Travel escalate: Intercept and escalate!');
+                    answer = "Transferring you back to the Astra Air Concierge Bot...";
                     sendPlainText(answer);
-                    skillName = "Agent_Escalation"
+                    skillName = "Default_Bot";
+                    skillId = convertSkill(); // Convert skillName to skillID
+                    transferConversation(skillId);
+
+                }
+
+                // Hack for escalation using the IBM aviation workspace.
+                else if (answer == "Let me transfer you to a live agent.") {
+
+                    console.log('Travel escalate: Intercept and escalate!');
+                    answer = "Transferring you to an Astra Air Agent...";
+                    sendPlainText(answer);
+                    skillName = "Agent_Escalation";
                     skillId = convertSkill(); // Convert skillName to skillID
                     transferConversation(skillId);
 
