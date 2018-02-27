@@ -147,6 +147,18 @@ function processResponse(err, response) {
 
                 }
 
+                // Hack for escalation using the IBM aviation workspace.
+                else if (answer == "No worries!") {
+
+                    console.log('Aviation escalate: Intercept and escalate!');
+                    answer = "Transferring you back to the Astra Air Concierge Bot..."
+                    sendPlainText(answer);
+                    skillName = "Agent_Escalation"
+                    skillId = convertSkill(); // Convert skillName to skillID
+                    transferConversation(skillId);
+
+                }
+
                 // Otherwise the response should just be sent a plain text.
                 else {
 
