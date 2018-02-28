@@ -14,7 +14,7 @@ http.createServer(function (req, res) {
 
 // ping heroku every 10 minutes to keep the connector running
 setInterval(function() {
-    http.get("http://travel-wcs-connector.herokuapp.com");
+    http.get("http://retail-wcs-connector.herokuapp.com");
 }, 600000);
 // *************************************************************
 
@@ -148,6 +148,7 @@ function processResponse(err, response) {
                 }
 
                 // Hack for escalation using the IBM aviation workspace.
+                /**
                 else if (answer == "No worries!") {
 
                     console.log('Travel escalate: Intercept and escalate!');
@@ -170,6 +171,7 @@ function processResponse(err, response) {
                     transferConversation(skillId);
 
                 }
+                **/
 
                 // Otherwise the response should just be sent a plain text.
                 else {
