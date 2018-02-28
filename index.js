@@ -14,7 +14,7 @@ http.createServer(function (req, res) {
 
 // ping heroku every 10 minutes to keep the connector running
 setInterval(function() {
-    http.get("http://travel-wcs-connector.herokuapp.com");
+    http.get("http://telco-wcs-connector.herokuapp.com");
 }, 600000);
 // *************************************************************
 
@@ -146,32 +146,6 @@ function processResponse(err, response) {
                     sendResponseSnippet(answerarray, item, 0, function(err, resp) {});
 
                 }
-
-                // Hack for escalation using the IBM aviation workspace.
-                /**
-                else if (answer == "No worries!") {
-
-                    console.log('Travel escalate: Intercept and escalate!');
-                    answer = "Transferring you back to the Astra Air Concierge Bot...";
-                    sendPlainText(answer);
-                    skillName = "Default_Bot";
-                    skillId = convertSkill(); // Convert skillName to skillID
-                    transferConversation(skillId);
-
-                }
-
-                // Hack for escalation using the IBM aviation workspace.
-                else if (answer == "Let me transfer you to a live agent.") {
-
-                    console.log('Travel escalate: Intercept and escalate!');
-                    answer = "Transferring you to an Astra Air Agent...";
-                    sendPlainText(answer);
-                    skillName = "Agent_Escalation";
-                    skillId = convertSkill(); // Convert skillName to skillID
-                    transferConversation(skillId);
-
-                }
-                **/
 
                 // Otherwise the response should just be sent a plain text.
                 else {
