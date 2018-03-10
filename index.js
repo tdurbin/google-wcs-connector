@@ -13,9 +13,9 @@ http.createServer(function (req, res) {
 }).listen(process.env.PORT || 6000);
 
 // ping heroku every 10 minutes to keep the connector running
-setInterval(function() {
-    http.get("http://td-wcs-connector.herokuapp.com");
-}, 600000);
+// setInterval(function() {
+//    http.get("http://td-wcs-connector.herokuapp.com");
+// }, 600000);
 // *************************************************************
 
 var prompt = require('prompt-sync')();
