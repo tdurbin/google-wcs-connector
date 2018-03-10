@@ -246,7 +246,7 @@ echoAgent.on('MyCoolAgent.ContentEvent',(contentEvent)=>{
     greenlight = 1;
     dialogID = contentEvent.dialogId;
 
-    console.log("sending message: " + contentEvent.message);
+    console.log("Sending message: " + contentEvent.message);
     message = contentEvent.message;
 
     setTimeout(function(){
