@@ -175,10 +175,10 @@ function processResponse(err, response) {
                             var currentDtTm = new Date();
                             var currentHour = currentDtTm.getHours();
                             var currentMins = currentDtTm.getMinutes();
-                            var openHour = "08";
-                            var openMins = "00";
-                            var closeHour = "22";
-                            var closeMins = "30";
+                            var openHour = process.env.OPERATING_HOURS_START_HH;
+                            var openMins = process.env.OPERATING_HOURS_START_MM;
+                            var closeHour = process.env.OPERATING_HOURS_END_HH;
+                            var closeMins = process.env.OPERATING_HOURS_END_MM;
                             var off_hours = true; // Assume off hours is true until it is evaluated as false
                             skillName = response.output.action.skill; // Set skillName to the value in the JSON response
                             skillId = convertSkill(); // Convert skillName to skillID
@@ -199,8 +199,8 @@ function processResponse(err, response) {
 
                             if (off_hours) {
                                 console.log('Current time   : ' + currentHour + ':' + currentMins + ' - Out of hours detected, sending notification snippets...');
-                                var transferMessageOne = 'Please note that our opening hours are ' + openHour + ':' + openMins + ' - ' + closeHour + ':' + closeMins + '.';
-                                var transferMessageTwo = 'One of our agents will get back to you as soon as possible.';
+                                var transferMessageOne = process.env.OPERATING_HOURS_MSG_1 + ' ' + openHour + ':' + openMins + ' - ' + closeHour + ':' + closeMins + '.';
+                                var transferMessageTwo = process.env.OPERATING_HOURS_MSG_2;
                                 var answerarray = [transferMessageOne, transferMessageTwo];
 
                                 // Send operating hours info message snippets after regular transfer message.
@@ -225,23 +225,8 @@ function processResponse(err, response) {
     }
 }
 
+
 // This code sends the customer message to the bot.
-/** Original code without greenlight hack...
-
-echoAgent.on('MyCoolAgent.ContentEvent', (contentEvent) => {
-    dialogID = contentEvent.dialogId;
-    conversation.message({
-        input: {
-            text: contentEvent.message
-        },
-        context: context
-    }, processResponse);
-
-    console.log('Inbound message: ' + contentEvent.message);
-});
-
-**/
-
 echoAgent.on('MyCoolAgent.ContentEvent',(contentEvent)=>{
     greenlight = 1;
     dialogID = contentEvent.dialogId;
