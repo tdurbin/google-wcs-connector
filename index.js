@@ -232,9 +232,9 @@ echoAgent.on('MyCoolAgent.ContentEvent',(contentEvent)=>{
     // Assuming undefined context will trigger a new conversation
     console.log("Sending message: " + contentEvent.message);
 
-    setTimeout(() => {
+//    setTimeout(() => {
 
-        if(greenlight){
+//        if(greenlight){
             conversation.message({
                 input: {
                     text: contentEvent.message
@@ -243,9 +243,9 @@ echoAgent.on('MyCoolAgent.ContentEvent',(contentEvent)=>{
             }, (err, res) => {
                 processResponse(err, res, contentEvent.dialogId);
             });
-            greenlight = 0;
-        }
-    }, 200); //Pause for 200 milliseconds so only the last utterance from the customer is processed.
+//            greenlight = 0;
+//        }
+//    }, 200); //Pause for 200 milliseconds so only the last utterance from the customer is processed.
 
 });
 
