@@ -240,7 +240,7 @@ echoAgent.on('MyCoolAgent.ContentEvent',(contentEvent)=>{
                     text: contentEvent.message
                 },
                 context : umsDialogToWatsonContext[contentEvent.dialogId]
-            }, processResponse);
+            }, processResponse(contentEvent.dialogId));
             greenlight = 0;
         }
     }, 100); //Pause for 100 milliseconds so only the last utterance from the customer is processed.
