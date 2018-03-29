@@ -232,7 +232,8 @@ echoAgent.on('MyCoolAgent.ContentEvent',(contentEvent)=>{
     // Assuming undefined context will trigger a new conversation
     console.log("Sending message: " + contentEvent.message);
 
-    setTimeout(() => {
+//    setTimeout(() => {
+    setTimeout(function(){
 
         if(greenlight){
             conversation.message({
