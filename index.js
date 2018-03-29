@@ -232,20 +232,6 @@ echoAgent.on('MyCoolAgent.ContentEvent',(contentEvent)=>{
     // Assuming undefined context will trigger a new conversation
     console.log("Sending message: " + contentEvent.message);
 
-    setTimeout(function(){
-
-        if(greenlight){
-            conversation.message({
-                input: {
-                    text: contentEvent.message
-                },
-                context : umsDialogToWatsonContext[contentEvent.dialogId]
-            }, processResponse(contentEvent.dialogId));
-            greenlight = 0;
-        }
-    }, 100); //Pause for 100 milliseconds so only the last utterance from the customer is processed.
-
-/**
     setTimeout(() => {
 
         if(greenlight){
@@ -259,8 +245,7 @@ echoAgent.on('MyCoolAgent.ContentEvent',(contentEvent)=>{
             });
             greenlight = 0;
         }
-    }, 100); //Pause for 100 milliseconds so only the last utterance from the customer is processed.
-**/
+    }, 200); //Pause for 200 milliseconds so only the last utterance from the customer is processed.
 
 });
 
