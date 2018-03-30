@@ -22,13 +22,12 @@ var prompt = require('prompt-sync')();
 var ConversationV1 = require('watson-developer-cloud/conversation/v1');
 var MyCoolAgent = require('./MyCoolAgent');
 var request = require('request');
-var context = {};
-var dialogID = "";
+var umsDialogToWatsonContext = {};
 var answer = "";
 var sc_answer = "";
-var typingdelay = 2000;
-var snippetdelay = 1300;
-var closedelay = 5000;
+var typingdelay = parseInt(process.env.TYPING_DELAY, 10); // Convert the TYPING_DELAY env. variable to an integer
+var snippetdelay = parseInt(process.env.SNIPPET_DELAY, 10); // Convert the ANSWER_DELAY env. variable to an integer
+var closedelay = parseInt(process.env.CLOSE_DELAY, 10); // Convert the CLOSE_DELAY env. variable to an integer
 var waittime = 0;
 var item = 0;
 var snippet = [];
@@ -68,13 +67,13 @@ var oauth = {
 };
 
 // Process the conversation response.
-function processResponse(err, response) {
+function processResponse(err, response, dialogID) {
     if (err) {
         console.error(err); // Oops - something went wrong.
         return;
     }
 
-    context = response.context;
+    umsDialogToWatsonContext[dialogID] = response.context;
 
     if (response.output.text.length != 0) {
 
@@ -102,7 +101,7 @@ function processResponse(err, response) {
             console.log('Detected entity: @' + response.entities[0].entity + ' - with a confidence of: ' + response.entities[0].confidence);
         }
 
-        setTimeout(function() { // Set the timeout function to simulate a delay from Watson so we can show the typing indicator.
+        setTimeout(() => { // Set the timeout function to simulate a delay from Watson so we can show the typing indicator.
 
             for (var i = 0; i < response.output.text.length; i++) {
 
@@ -127,7 +126,7 @@ function processResponse(err, response) {
                 // If structured content is detected, call the sendStructuredContent function.
                 if (answer.startsWith("{")) {
 
-                    sendStructuredContent(answer);
+                    sendStructuredContent(answer, dialogID);
 
                 }
 
@@ -140,17 +139,17 @@ function processResponse(err, response) {
                     // Send the first snippet directly so there is no delay after typing indicator.
                     item = 0;
                     snippet = answerarray[item];
-                    sendMySnippet(snippet, item);
+                    sendMySnippet(snippet, item, dialogID);
                     // Subsequent snippets are then sent via a callback function with the pre-defined snippet delay.
                     item = 1;
-                    sendResponseSnippet(answerarray, item, 0, function(err, resp) {});
+                    sendResponseSnippet(answerarray, item, dialogID, function(err, resp) {});
 
                 }
 
                 // Otherwise the response should just be sent a plain text.
                 else {
 
-                    sendPlainText(answer);
+                    sendPlainText(answer, dialogID);
 
                 }
 
@@ -164,7 +163,7 @@ function processResponse(err, response) {
                         // If a close action is detected, close the conversation after a delay.
                         if (response.output.action.name === "close") {
                             setTimeout(function() { // Apply timeout function so customer can see the close message before the exit survey is displayed.
-                                closeConversation();
+                                closeConversation(dialogID);
                             }, closedelay) // delay in milliseconds before closing
                         }
 
@@ -204,17 +203,17 @@ function processResponse(err, response) {
                                 var answerarray = [transferMessageOne, transferMessageTwo];
 
                                 // Send operating hours info message snippets after regular transfer message.
-                                sendResponseSnippet(answerarray, 0, function(err, resp) {});
+                                sendResponseSnippet(answerarray, 0, dialogID, function(err, resp) {});
 
                                 // Then transfer the conversation to the specified skill after all messages have been sent.
                                 waittime = snippetdelay * 3;
-                                setTimeout(function() {
-                                    transferConversation(skillId);
+                                setTimeout(() => {
+                                    transferConversation(skillId, dialogID);
                                 }, waittime);
 
                             } else {
                                 console.log('Current time   : ' + currentHour + ':' + currentMins);
-                                transferConversation(skillId);
+                                transferConversation(skillId, dialogID);
 
                             }
                         }
@@ -229,23 +228,25 @@ function processResponse(err, response) {
 // This code sends the customer message to the bot.
 echoAgent.on('MyCoolAgent.ContentEvent',(contentEvent)=>{
     greenlight = 1;
-    dialogID = contentEvent.dialogId;
 
+    // Assuming undefined context will trigger a new conversation
     console.log("Sending message: " + contentEvent.message);
-    message = contentEvent.message;
 
-    setTimeout(function(){
+    setTimeout(() => {
 
         if(greenlight){
             conversation.message({
                 input: {
-                    text: message
+                    text: contentEvent.message
                 },
-                context : context
-            }, processResponse);
+                context : umsDialogToWatsonContext[contentEvent.dialogId]
+            }, (err, res) => {
+                processResponse(err, res, contentEvent.dialogId);
+            });
             greenlight = 0;
         }
-    }, 100); //Pause for 100 milliseconds so only the last utterance from the customer is processed.
+    }, 200); //Pause for 200 milliseconds so only the last utterance from the customer is processed.
+
 });
 
 
@@ -254,7 +255,7 @@ echoAgent.on('MyCoolAgent.ContentEvent',(contentEvent)=>{
  *******************************************************************/
 
 // This function sends a Plain Text message to the UMS.
-function sendPlainText(answer) {
+function sendPlainText(answer, dialogID) {
 
     console.log('Message format : Plain text');
     echoAgent.publishEvent({
@@ -269,7 +270,7 @@ function sendPlainText(answer) {
 }
 
 // This function ends a Structured Content message to the UMS.
-function sendStructuredContent(answer) {
+function sendStructuredContent(answer, dialogID) {
 
     console.log('Message format : Structured content');
     sc_answer = JSON.parse(answer);
@@ -285,28 +286,28 @@ function sendStructuredContent(answer) {
 }
 
 // This function initiates the snippet callback function.
-function sendResponseSnippet(answerarray, item) {
+function sendResponseSnippet(answerarray, item, dialogID) {
 
-    callbackSnippet(answerarray, item, function(err, resp) {});
+    callbackSnippet(answerarray, item, dialogID, function(err, resp) {});
 
 }
 
 // This function recurses through the message snippet array and calls the sendMySnippet function.
-function callbackSnippet(answerarray, item, callback) {
+function callbackSnippet(answerarray, item, dialogID, callback) {
 
     snippet = answerarray[item];
     setTimeout(function() {
-        sendMySnippet(snippet, item);
+        sendMySnippet(snippet, item, dialogID);
         item = item + 1;
         if (item < answerarray.length) {
-            callbackSnippet(answerarray, item, callback);
+            callbackSnippet(answerarray, item, dialogID, callback);
         }
     }, snippetdelay);
 
 }
 
 // This function simply sends each snippet!
-function sendMySnippet(snippet, item) {
+function sendMySnippet(snippet, item, dialogID) {
 
     console.log('     Snippet ' + item + ' : -> ' + snippet.substring(0, 47) + '...');
     echoAgent.publishEvent({
@@ -321,7 +322,7 @@ function sendMySnippet(snippet, item) {
 }
 
 // This function closes an active conversation.
-function closeConversation() {
+function closeConversation(dialogID) {
 
     echoAgent.updateConversationField({
         conversationId: dialogID,
@@ -334,13 +335,14 @@ function closeConversation() {
             console.log(err);
         } else {
             console.log("*** Conversation has been closed ***");
+            delete umsDialogToWatsonContext[dialogID];
         }
     });
 
 }
 
 // This function transfers the active conversation to the specified skill.
-function transferConversation(skillId) {
+function transferConversation(skillId, dialogID) {
 
     echoAgent.updateConversationField({
         conversationId: dialogID,
